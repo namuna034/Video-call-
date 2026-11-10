@@ -90,16 +90,45 @@ export default function App() {
 
   const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
 
-  const [chatHistory, setChatHistory] = useState<Record<string, ChatMessage[]>>({
-    'priya-1': [
-      {
-        id: 'msg-init-1',
-        senderId: 'priya-1',
-        text: 'Hey! Welcome to Chalo Ji!',
-        timestamp: '10:42 AM',
-        status: 'read',
-      },
-    ],
+  // MULTIPLE WELCOME MESSAGES FEATURE ON FIRST LOGIN
+  const [chatHistory, setChatHistory] = useState<Record<string, ChatMessage[]>>(() => {
+    try {
+      const savedChats = localStorage.getItem('chaloji_initial_chats');
+      if (savedChats) return JSON.parse(savedChats);
+    } catch (e) {}
+
+    const initialChats = {
+      'priya-1': [
+        {
+          id: 'msg-init-1',
+          senderId: 'priya-1',
+          text: 'Hey! Welcome to Chalo Ji! Saw you are around ✨',
+          timestamp: 'Just now',
+          status: 'delivered' as const,
+        },
+      ],
+      'ananya-4': [
+        {
+          id: 'msg-init-2',
+          senderId: 'ananya-4',
+          text: 'Hi there! Welcome to the neighborhood. Are you into photography or cafe hopping?',
+          timestamp: '2m ago',
+          status: 'delivered' as const,
+        },
+      ],
+      'zoya-5': [
+        {
+          id: 'msg-init-3',
+          senderId: 'zoya-5',
+          text: 'Hello! Let me know if you ever want to check out local spots around 🏺',
+          timestamp: '5m ago',
+          status: 'delivered' as const,
+        },
+      ],
+    };
+
+    localStorage.setItem('chaloji_initial_chats', JSON.stringify(initialChats));
+    return initialChats;
   });
 
   const showToast = (msg: string) => {
@@ -168,7 +197,7 @@ export default function App() {
     });
   }, [radiusKm, onlyActiveNow, selectedCategory, searchQuery]);
 
-  const unreadCount = Object.keys(chatHistory).length > 0 ? 1 : 0;
+  const unreadCount = Object.keys(chatHistory).length > 0 ? 3 : 0;
 
   // FIRST-TIME SIGN UP SCREEN
   if (!hasRegistered) {
