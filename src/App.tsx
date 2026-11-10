@@ -27,7 +27,11 @@ import {
   Check,
   KeyRound,
   AlertCircle,
-  UserCircle
+  UserCircle,
+  MapPin,
+  User,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 
 export default function App() {
@@ -36,6 +40,17 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [onlyActiveNow, setOnlyActiveNow] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // User Profile Registration State
+  const [hasRegistered, setHasRegistered] = useState<boolean>(() => {
+    return localStorage.getItem('chaloji_user_registered') === 'true';
+  });
+  const [regName, setRegName] = useState('');
+  const [regAge, setRegAge] = useState('');
+  const [regLocation, setRegLocation] = useState('');
+  const [regOccupation, setRegOccupation] = useState('');
+  const [regBio, setRegBio] = useState('');
+  const [regError, setRegError] = useState('');
 
   // Prime Subscription States
   const [isPrimeUser, setIsPrimeUser] = useState<boolean>(false);
@@ -65,7 +80,6 @@ export default function App() {
     return false;
   });
 
-  // Synced Dark Mode class on <html>
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -84,7 +98,7 @@ export default function App() {
       {
         id: 'msg-init-1',
         senderId: 'priya-1',
-        text: 'Hey! Saw you are around. Have you tried the local spots here?',
+        text: 'Hey! Saw you are around. Welcome to Chalo Ji!',
         timestamp: '10:42 AM',
         status: 'read',
       },
@@ -96,7 +110,27 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Intercept Chat Action for Prime Check
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim() || !regLocation.trim()) {
+      setRegError('Kripya apna Name aur Address/Location zaroor bharein!');
+      return;
+    }
+
+    const newUserProfile = {
+      name: regName,
+      age: parseInt(regAge) || 22,
+      location: regLocation,
+      occupation: regOccupation || 'Local Explorer',
+      bio: regBio || 'Hey there! I am using Chalo Ji to connect with nearby people.',
+    };
+
+    localStorage.setItem('chaloji_user_profile', JSON.stringify(newUserProfile));
+    localStorage.setItem('chaloji_user_registered', 'true');
+    setHasRegistered(true);
+    showToast(`Welcome ${regName}! Your profile is ready.`);
+  };
+
   const handleOpenChat = (user: UserProfile) => {
     if (!isPrimeUser) {
       setShowPrimeModal(true);
@@ -105,11 +139,10 @@ export default function App() {
     }
   };
 
-  // Verification Logic (Secret Access / UTR Validation)
   const handleVerifyUTR = () => {
     const cleanUtr = utrNumber.trim();
-    if (cleanUtr.length < 6) {
-      setUtrError('Kripya valid UTR ya Access Code enter karein!');
+    if (cleanUtr.length < 5) {
+      setUtrError('Kripya valid Secret Code ya UTR Ref No. enter karein!');
       return;
     }
 
@@ -197,6 +230,107 @@ export default function App() {
 
   const unreadCount = Object.keys(chatHistory).length > 0 ? 1 : 0;
 
+  // FIRST-TIME INITIAL SIGN UP / PROFILE CREATION SCREEN
+  if (!hasRegistered) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4 font-sans">
+        <div className="max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-rose-500/20 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-rose-500/30">
+              <Sparkles className="w-7 h-7" />
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-white">Join Chalo Ji</h1>
+            <p className="text-xs text-slate-400">
+              Create your profile to find & chat with nearby locals in real-time
+            </p>
+          </div>
+
+          <form onSubmit={handleRegister} className="space-y-4">
+            {regError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{regError}</span>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-rose-400" /> Full Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Mohit Sharma"
+                value={regName}
+                onChange={(e) => setRegName(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-300">Age</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 21"
+                  value={regAge}
+                  onChange={(e) => setRegAge(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-300">Occupation</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Designer / Student"
+                  value={regOccupation}
+                  onChange={(e) => setRegOccupation(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-amber-400" /> Neighborhood / Address *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Indiranagar 100ft Rd, BLR"
+                value={regLocation}
+                onChange={(e) => setRegLocation(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300">Short Bio / Interests</label>
+              <textarea
+                rows={2}
+                placeholder="What do you love? (e.g. Coffee, Coding, Gaming...)"
+                value={regBio}
+                onChange={(e) => setRegBio(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 resize-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 pt-3"
+            >
+              <span>Create Profile & Continue</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       <TopNavigation
@@ -228,7 +362,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Direct Profile Button in Header */}
             <button
               onClick={() => setIsMyProfileOpen(true)}
               className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 rounded-xl text-xs font-semibold hover:bg-rose-100 transition-all shadow-xs"
@@ -424,7 +557,6 @@ export default function App() {
               </p>
             </div>
 
-            {/* Dynamic QR Code Box */}
             <div className="bg-slate-100 dark:bg-slate-950 p-3.5 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 space-y-2">
               <div className="w-40 h-40 bg-white p-2 mx-auto rounded-xl shadow-inner flex flex-col items-center justify-center">
                 <img
@@ -438,15 +570,14 @@ export default function App() {
               </p>
             </div>
 
-            {/* Verification Form */}
             <div className="space-y-2.5 text-left">
               <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                <KeyRound className="w-3.5 h-3.5 text-amber-500" /> Enter UTR / Ref No. or Access Code
+                <KeyRound className="w-3.5 h-3.5 text-amber-500" /> Enter Secret Access Code / UTR
               </label>
 
               <input
                 type="text"
-                placeholder="Enter 12-digit UTR or Code"
+                placeholder="Enter Code (e.g. CHALO29)"
                 value={utrNumber}
                 onChange={(e) => {
                   setUtrNumber(e.target.value);
@@ -506,7 +637,7 @@ export default function App() {
         />
       )}
 
-      {/* My Profile Creation & Setup Modal */}
+      {/* My Profile Setup & View Modal */}
       <MyProfileModal
         isOpen={isMyProfileOpen}
         onClose={() => setIsMyProfileOpen(false)}
