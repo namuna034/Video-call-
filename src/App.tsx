@@ -21,16 +21,13 @@ import {
   Map as MapIcon,
   MessageSquare,
   ShieldCheck,
-  Zap,
-  Sparkles,
-  Users,
-  CheckCircle2,
   Crown,
   X,
   QrCode,
   Check,
   KeyRound,
-  AlertCircle
+  AlertCircle,
+  UserCircle
 } from 'lucide-react';
 
 export default function App() {
@@ -87,7 +84,7 @@ export default function App() {
       {
         id: 'msg-init-1',
         senderId: 'priya-1',
-        text: 'Hey Kabir! Saw you are also around Indiranagar 100ft Rd. Have you tried the new pour-over at Nerlu?',
+        text: 'Hey! Saw you are around. Have you tried the local spots here?',
         timestamp: '10:42 AM',
         status: 'read',
       },
@@ -108,11 +105,11 @@ export default function App() {
     }
   };
 
-  // UTR Verification Logic
+  // Verification Logic (Secret Access / UTR Validation)
   const handleVerifyUTR = () => {
     const cleanUtr = utrNumber.trim();
-    if (cleanUtr.length < 12 || !/^\d+$/.test(cleanUtr)) {
-      setUtrError('Kripya 12-digit ka sahi UPI UTR/Ref No. enter karein!');
+    if (cleanUtr.length < 6) {
+      setUtrError('Kripya valid UTR ya Access Code enter karein!');
       return;
     }
 
@@ -125,7 +122,7 @@ export default function App() {
       setShowPrimeModal(false);
       setUtrNumber('');
       showToast('🎉 Premium Chat Access Activated!');
-    }, 1500);
+    }, 1200);
   };
 
   const handleSendWave = (user: UserProfile) => {
@@ -226,61 +223,60 @@ export default function App() {
               )}
             </div>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Find and chat with neighbors, creators, and fellow locals in real time.
+              Find and connect with neighbors, creators, and fellow locals instantly.
             </p>
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800/80 rounded-xl shrink-0 self-start sm:self-auto">
+          <div className="flex items-center gap-3">
+            {/* Direct Profile Button in Header */}
             <button
-              onClick={() => setCurrentTab('feed')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                currentTab === 'feed'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
+              onClick={() => setIsMyProfileOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 rounded-xl text-xs font-semibold hover:bg-rose-100 transition-all shadow-xs"
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Cards Grid</span>
+              <UserCircle className="w-4 h-4" />
+              <span>My Profile</span>
             </button>
 
-            <button
-              onClick={() => setCurrentTab('radar')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                currentTab === 'radar'
-                  ? 'bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5 text-rose-500" />
-              <span>Radar Scanner</span>
-            </button>
+            <div className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800/80 rounded-xl shrink-0">
+              <button
+                onClick={() => setCurrentTab('feed')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                  currentTab === 'feed'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Grid</span>
+              </button>
 
-            <button
-              onClick={() => setCurrentTab('map')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                currentTab === 'map'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <MapIcon className="w-3.5 h-3.5" />
-              <span>Area Map</span>
-            </button>
+              <button
+                onClick={() => setCurrentTab('radar')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                  currentTab === 'radar'
+                    ? 'bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5 text-rose-500" />
+                <span>Radar</span>
+              </button>
 
-            <button
-              onClick={() => setCurrentTab('chats')}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                currentTab === 'chats'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>Chats</span>
-              {unreadCount > 0 && (
-                <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse" />
-              )}
-            </button>
+              <button
+                onClick={() => setCurrentTab('chats')}
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                  currentTab === 'chats'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Chats</span>
+                {unreadCount > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -390,12 +386,10 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>Encrypted local proximity protocol · Exact GPS coordinates never shared publicly</span>
+            <span>Secure Proximity Mesh · Privacy Protected</span>
           </div>
 
           <div className="flex items-center gap-4 text-xs">
-            <span>Indiranagar Local Mesh</span>
-            <span aria-hidden="true">·</span>
             <span>Radius: {radiusKm} km</span>
             <span aria-hidden="true">·</span>
             <span>Chalo Ji Discovery © 2026</span>
@@ -403,7 +397,7 @@ export default function App() {
         </div>
       </footer>
 
-      {/* ₹29 PRIME SUBSCRIPTION / UTR VERIFICATION MODAL */}
+      {/* ₹29 PRIME SUBSCRIPTION / UTR & CODE VERIFICATION MODAL */}
       {showPrimeModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative">
@@ -426,7 +420,7 @@ export default function App() {
                 Unlock Unlimited Chat
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Scan QR & pay <span className="font-bold text-rose-500">₹29</span> to get lifetime access
+                Scan QR & pay <span className="font-bold text-rose-500">₹29</span> to get instant access
               </p>
             </div>
 
@@ -440,20 +434,19 @@ export default function App() {
                 />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1 font-medium">
-                <QrCode className="w-3.5 h-3.5 text-rose-500" /> Pay using PhonePe, GPay or Paytm
+                <QrCode className="w-3.5 h-3.5 text-rose-500" /> UPI ID: Namunana034@okaxis
               </p>
             </div>
 
-            {/* UTR Input Form */}
+            {/* Verification Form */}
             <div className="space-y-2.5 text-left">
               <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                <KeyRound className="w-3.5 h-3.5 text-amber-500" /> Enter 12-Digit UPI Ref / UTR No.
+                <KeyRound className="w-3.5 h-3.5 text-amber-500" /> Enter UTR / Ref No. or Access Code
               </label>
 
               <input
                 type="text"
-                maxLength={12}
-                placeholder="e.g. 423871982301"
+                placeholder="Enter 12-digit UTR or Code"
                 value={utrNumber}
                 onChange={(e) => {
                   setUtrNumber(e.target.value);
@@ -470,11 +463,11 @@ export default function App() {
 
               <button
                 onClick={handleVerifyUTR}
-                disabled={isPaymentVerifying || utrNumber.length < 12}
+                disabled={isPaymentVerifying || !utrNumber.trim()}
                 className="w-full py-3 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-2"
               >
                 {isPaymentVerifying ? (
-                  <span>Verifying Transaction...</span>
+                  <span>Verifying Code...</span>
                 ) : (
                   <>
                     <Check className="w-4 h-4" /> Verify & Unlock Chat
@@ -513,6 +506,7 @@ export default function App() {
         />
       )}
 
+      {/* My Profile Creation & Setup Modal */}
       <MyProfileModal
         isOpen={isMyProfileOpen}
         onClose={() => setIsMyProfileOpen(false)}
@@ -528,7 +522,7 @@ export default function App() {
 
       {toastMessage && (
         <div className="fixed bottom-20 md:bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
+          <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
       )}
