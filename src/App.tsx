@@ -97,14 +97,14 @@ export default function App() {
       if (savedChats) return JSON.parse(savedChats);
     } catch (e) {}
 
-    const initialChats = {
+    const initialChats: Record<string, ChatMessage[]> = {
       'priya-1': [
         {
           id: 'msg-init-1',
           senderId: 'priya-1',
           text: 'Hey! Welcome to Chalo Ji! Saw you are around ✨',
           timestamp: 'Just now',
-          status: 'delivered' as const,
+          status: 'delivered',
         },
       ],
       'ananya-4': [
@@ -113,7 +113,7 @@ export default function App() {
           senderId: 'ananya-4',
           text: 'Hi there! Welcome to the neighborhood. Are you into photography or cafe hopping?',
           timestamp: '2m ago',
-          status: 'delivered' as const,
+          status: 'delivered',
         },
       ],
       'zoya-5': [
@@ -122,7 +122,7 @@ export default function App() {
           senderId: 'zoya-5',
           text: 'Hello! Let me know if you ever want to check out local spots around 🏺',
           timestamp: '5m ago',
-          status: 'delivered' as const,
+          status: 'delivered',
         },
       ],
     };
