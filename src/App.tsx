@@ -41,9 +41,9 @@ export default function App() {
   const [onlyActiveNow, setOnlyActiveNow] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // First-time Registration State
+  // Strict Registration Check (Jab tak profile nahi banegi, app lock rahegi)
   const [hasRegistered, setHasRegistered] = useState<boolean>(() => {
-    return localStorage.getItem('chaloji_user_registered') === 'true';
+    return localStorage.getItem('chaloji_user_registered') === 'true' && Boolean(localStorage.getItem('chaloji_user_profile'));
   });
   const [regName, setRegName] = useState('');
   const [regLocation, setRegLocation] = useState('');
@@ -199,7 +199,7 @@ export default function App() {
 
   const unreadCount = Object.keys(chatHistory).length > 0 ? 3 : 0;
 
-  // FIRST-TIME SIGN UP SCREEN
+  // FIRST-TIME SIGN UP SCREEN (Mandatory Registration Wall)
   if (!hasRegistered) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4 font-sans">
