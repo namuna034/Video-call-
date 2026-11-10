@@ -25,6 +25,10 @@ import {
   Sparkles,
   Users,
   CheckCircle2,
+  Crown,
+  X,
+  QrCode,
+  Check
 } from 'lucide-react';
 
 export default function App() {
@@ -33,6 +37,11 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [onlyActiveNow, setOnlyActiveNow] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Prime Subscription States
+  const [isPrimeUser, setIsPrimeUser] = useState<boolean>(false);
+  const [showPrimeModal, setShowPrimeModal] = useState<boolean>(false);
+  const [isPaymentVerifying, setIsPaymentVerifying] = useState<boolean>(false);
 
   // Modals & Selection States
   const [activeChatUser, setActiveChatUser] = useState<UserProfile | null>(null);
@@ -86,12 +95,31 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // Intercept Chat Action for Prime Check
+  const handleOpenChat = (user: UserProfile) => {
+    if (!isPrimeUser) {
+      setShowPrimeModal(true);
+    } else {
+      setActiveChatUser(user);
+    }
+  };
+
+  // Simulate Payment Approval
+  const handleConfirmPayment = () => {
+    setIsPaymentVerifying(true);
+    setTimeout(() => {
+      setIsPaymentVerifying(false);
+      setIsPrimeUser(true);
+      setShowPrimeModal(false);
+      showToast('🎉 Premium Access Activated!');
+    }, 1500);
+  };
+
   const handleSendWave = (user: UserProfile) => {
     if (!wavedUserIds.includes(user.id)) {
       setWavedUserIds((prev) => [...prev, user.id]);
       showToast(`Waved to ${user.name.split(' ')[0]} 👋`);
 
-      // Initialize a friendly greeting in chat thread if empty
       if (!chatHistory[user.id]) {
         setChatHistory((prev) => ({
           ...prev,
@@ -109,16 +137,11 @@ export default function App() {
     }
   };
 
-  // Filter profiles based on radius, active status, category, and text search
   const filteredProfiles = useMemo(() => {
     return INITIAL_PROFILES.filter((user) => {
-      // Distance filter
       if (user.distanceKm > radiusKm) return false;
-
-      // Active now filter
       if (onlyActiveNow && user.activeStatus !== 'Active now') return false;
 
-      // Category filter
       if (selectedCategory !== 'all') {
         const textToSearch = (
           user.interests.join(' ') +
@@ -149,7 +172,6 @@ export default function App() {
         }
       }
 
-      // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = user.name.toLowerCase().includes(q);
@@ -167,7 +189,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
-      {/* Top Bar adheres to Top Bar Contract */}
       <TopNavigation
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
@@ -178,20 +199,24 @@ export default function App() {
         activeRadius={radiusKm}
       />
 
-      {/* Main App Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-12 space-y-6">
-        {/* Banner / View Switcher Strip */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Local Discovery
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Local Discovery
+              </h1>
+              {isPrimeUser && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
+                  <Crown className="w-3 h-3 fill-amber-500" /> PRO
+                </span>
+              )}
+            </div>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               Find and chat with neighbors, creators, and fellow locals in real time.
             </p>
           </div>
 
-          {/* Interactive View Switcher Tabs */}
           <div className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800/80 rounded-xl shrink-0 self-start sm:self-auto">
             <button
               onClick={() => setCurrentTab('feed')}
@@ -246,7 +271,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Global Filter Bar (Distance Radius slider, Presets, Categories) */}
         {currentTab !== 'chats' && (
           <DistanceFilter
             radiusKm={radiusKm}
@@ -260,14 +284,12 @@ export default function App() {
           />
         )}
 
-        {/* View Content Renderer */}
         {currentTab === 'feed' && (
           <div className="space-y-4">
-            {/* Search Input bar */}
             <div className="flex items-center gap-3">
               <input
                 type="text"
-                placeholder="Search by name, hobby (e.g. coffee, running, design), or neighborhood..."
+                placeholder="Search by name, hobby, or neighborhood..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500"
@@ -277,19 +299,18 @@ export default function App() {
                   onClick={() => setSearchQuery('')}
                   className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white underline shrink-0"
                 >
-                  Clear search
+                  Clear
                 </button>
               )}
             </div>
 
-            {/* Profile Cards Grid */}
             {filteredProfiles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredProfiles.map((user) => (
                   <UserCard
                     key={user.id}
                     user={user}
-                    onOpenChat={(u) => setActiveChatUser(u)}
+                    onOpenChat={handleOpenChat}
                     onViewProfile={(u) => setActiveProfileUser(u)}
                     onSendWave={handleSendWave}
                     hasWaved={wavedUserIds.includes(user.id)}
@@ -304,9 +325,6 @@ export default function App() {
                 <h3 className="font-bold text-base text-slate-900 dark:text-white">
                   No nearby profiles in this radius
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Try expanding your search distance slider above (e.g. 10 km or 15 km) or turning off the "Active Now Only" filter.
-                </p>
                 <button
                   onClick={() => {
                     setRadiusKm(15);
@@ -327,7 +345,7 @@ export default function App() {
           <RadarView
             users={filteredProfiles}
             radiusKm={radiusKm}
-            onOpenChat={(u) => setActiveChatUser(u)}
+            onOpenChat={handleOpenChat}
             onViewProfile={(u) => setActiveProfileUser(u)}
             onSendWave={handleSendWave}
             wavedUserIds={wavedUserIds}
@@ -338,7 +356,7 @@ export default function App() {
           <MapView
             users={filteredProfiles}
             radiusKm={radiusKm}
-            onOpenChat={(u) => setActiveChatUser(u)}
+            onOpenChat={handleOpenChat}
             onViewProfile={(u) => setActiveProfileUser(u)}
             onSendWave={handleSendWave}
             wavedUserIds={wavedUserIds}
@@ -349,7 +367,7 @@ export default function App() {
           <MessagesListView
             users={INITIAL_PROFILES}
             chatHistory={chatHistory}
-            onOpenChat={(u) => setActiveChatUser(u)}
+            onOpenChat={handleOpenChat}
             onViewProfile={(u) => setActiveProfileUser(u)}
           />
         )}
@@ -373,6 +391,63 @@ export default function App() {
         </div>
       </footer>
 
+      {/* ₹29 PRIME SUBSCRIPTION / UPI QR MODAL */}
+      {showPrimeModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl relative">
+            <button
+              onClick={() => setShowPrimeModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-full"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-rose-500/20">
+              <Crown className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-1">
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                Unlock Unlimited Chat
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Directly connect with nearby users for just <span className="font-bold text-rose-500">₹29</span>
+              </p>
+            </div>
+
+            {/* Dynamic UPI QR Box with Safe UPI ID */}
+            <div className="bg-slate-100 dark:bg-slate-950 p-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 space-y-3">
+              <div className="w-44 h-44 bg-white p-2 mx-auto rounded-xl shadow-inner flex flex-col items-center justify-center relative">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=Namunana034@okaxis%26pn=ChaloJi%26am=29%26cu=INR`}
+                  alt="UPI QR Code"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
+                <QrCode className="w-3.5 h-3.5 text-rose-500" /> Scan using PhonePe, GPay or Paytm
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <button
+                onClick={handleConfirmPayment}
+                disabled={isPaymentVerifying}
+                className="w-full py-3 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                {isPaymentVerifying ? (
+                  <span>Verifying Payment...</span>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" /> Done Payment (₹29)
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Interactive Direct Message Window Modal */}
       {activeChatUser && (
         <ChatModal
@@ -394,16 +469,12 @@ export default function App() {
           user={activeProfileUser}
           isOpen={Boolean(activeProfileUser)}
           onClose={() => setActiveProfileUser(null)}
-          onOpenChat={(u) => {
-            setActiveProfileUser(null);
-            setActiveChatUser(u);
-          }}
+          onOpenChat={handleOpenChat}
           onSendWave={handleSendWave}
           hasWaved={wavedUserIds.includes(activeProfileUser.id)}
         />
       )}
 
-      {/* My Profile / Location broadcast modal */}
       <MyProfileModal
         isOpen={isMyProfileOpen}
         onClose={() => setIsMyProfileOpen(false)}
@@ -411,14 +482,12 @@ export default function App() {
         setRadius={setRadiusKm}
       />
 
-      {/* Mobile Ergonomic Bottom Tab Bar */}
       <BottomNav
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         unreadCount={unreadCount}
       />
 
-      {/* Toast Alert */}
       {toastMessage && (
         <div className="fixed bottom-20 md:bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
