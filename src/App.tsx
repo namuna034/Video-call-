@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, MapPin, Sparkles, User, Check } from 'lucide-react';
 
 interface MyProfileModalProps {
@@ -21,8 +21,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  // Load saved profile data from localStorage
-  const [savedProfile, setSavedProfile] = useState(() => {
+  const [profile, setProfile] = useState(() => {
     try {
       const stored = localStorage.getItem('chaloji_user_profile');
       if (stored) return JSON.parse(stored);
@@ -35,20 +34,21 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({
     };
   });
 
-  const [name, setName] = useState(savedProfile.name || '');
-  const [location, setLocation] = useState(savedProfile.location || '');
-  const [bio, setBio] = useState(savedProfile.bio || '');
+  const [name, setName] = useState(profile.name || '');
+  const [location, setLocation] = useState(profile.location || '');
+  const [bio, setBio] = useState(profile.bio || '');
   const [saved, setSaved] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const updated = { ...savedProfile, name, location, bio };
+    const updated = { ...profile, name, location, bio };
     localStorage.setItem('chaloji_user_profile', JSON.stringify(updated));
-    setSavedProfile(updated);
+    setProfile(updated);
     setSaved(true);
     setTimeout(() => {
       setSaved(false);
       onClose();
+      window.location.reload(); // Refresh to reflect changes everywhere
     }, 1000);
   };
 
@@ -68,10 +68,10 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({
           </div>
           <div>
             <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
-              My Discovery Profile
+              Edit My Profile
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Manage how nearby locals see you on Chalo Ji
+              Update your live discovery details
             </p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({
         <form onSubmit={handleSave} className="space-y-4 text-left">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-              <User className="w-3.5 h-3.5 text-rose-500" /> Your Display Name
+              <User className="w-3.5 h-3.5 text-rose-500" /> Your Name
             </label>
             <input
               type="text"
@@ -92,12 +92,13 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-amber-500" /> Current Neighborhood / Location
+              <MapPin className="w-3.5 h-3.5 text-amber-500" /> Your Address / Neighborhood
             </label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Jhunjhunu, Rajasthan"
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
@@ -105,7 +106,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-purple-500" /> Bio / Status Vibe
+              <Sparkles className="w-3.5 h-3.5 text-purple-500" /> Bio / Vibe Status
             </label>
             <textarea
               rows={2}
@@ -122,7 +123,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({
             >
               {saved ? (
                 <>
-                  <Check className="w-4 h-4" /> Profile Updated!
+                  <Check className="w-4 h-4" /> Saved Successfully!
                 </>
               ) : (
                 <span>Save Profile Changes</span>
