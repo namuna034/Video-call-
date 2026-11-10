@@ -1,0 +1,6 @@
+{
+  "name": "Chalo Ji - Local Discovery & Nearby Chat",
+  "description": "Discover nearby people, explore interactive radar and map feeds, and connect in real-time direct chats within your local radius.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
